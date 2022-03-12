@@ -68,6 +68,43 @@ class MemberJpaRepositoryTest {
         List<Member> result = memberJpaRepository.findByUsernameANdAgeGreaterThen("AAA", 10);
         Assertions.assertThat(result.get(0).getUsername()).isEqualTo(m2.getUsername());
         Assertions.assertThat(result.get(0).getAge()).isEqualTo(m2.getAge());
+    }
+
+    @Test
+    public void testNamedQuery(){
+        Member m1 = new Member("member1", 10);
+        Member m2 = new Member("member2", 20);
+        memberJpaRepository.save(m1);
+        memberJpaRepository.save(m2);
+        List<Member> member1 = memberJpaRepository.findByUsername("member1");
+
+        Assertions.assertThat(member1.get(0)).isEqualTo(m1);
+    }
+
+    @Test
+    public void paging(){
+
+        //given
+        memberJpaRepository.save(new Member("member1", 10));
+        memberJpaRepository.save(new Member("member2", 10));
+        memberJpaRepository.save(new Member("member3", 10));
+        memberJpaRepository.save(new Member("member4", 10));
+        memberJpaRepository.save(new Member("member5", 10));
+        memberJpaRepository.save(new Member("member6", 10));
+        memberJpaRepository.save(new Member("member7", 10));
+
+        int age = 10;
+        int offset = 0;
+        int limit = 3;
+
+        //when
+        List<Member> members = memberJpaRepository.findByPage(age, offset, limit);
+        long totalCount = memberJpaRepository.totalCount(age);
+
+        //then
+        Assertions.assertThat(members.size()).isEqualTo(3);
+        Assertions.assertThat(totalCount).isEqualTo(7);
 
     }
+
 }
