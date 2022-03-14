@@ -13,7 +13,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom{
+public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom, JpaSpecificationExecutor{
 
     List<Member> findByUsernameAndAgeGreaterThan(String username,int age);
 
@@ -79,5 +79,14 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     List<Member> findLockByUsername(String username);
 
+    <T> List<T> findProjectionByUsername(@Param("username") String username);
+
+    @Query(value ="select * from member where username = ?", nativeQuery = true)
+    Member findByNativeQuery(String username);
+
+    @Query(value ="select m.member_id as id, m.username, t.name as teamName " +
+            "from Member m from left join team t",
+            countQuery = "select count(*) from Member", nativeQuery = true)
+    Page<MemberProjection> findByNativeProjection(Pageable pageable);
 
 }

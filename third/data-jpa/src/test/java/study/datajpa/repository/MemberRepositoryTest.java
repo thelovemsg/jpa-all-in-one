@@ -1,12 +1,10 @@
 package study.datajpa.repository;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.dto.MemberDto;
@@ -218,7 +216,8 @@ class MemberRepositoryTest {
         em.clear(); // 영속성 클리어!
         List<Member> result = memberRepository.findByUsername("member5");
         Member member = result.get(0);
-        System.out.println("member = " + member); // bulk연산시에는 영속성의 내용 상관없이 바로 db에 전송함 => 서로 값이 다름
+        System.out.println("member = " + member);
+        // bulk연산시에는 영속성의 내용 상관없이 바로 db에 전송함 => 서로 값이 다름
         //=> 그러므로 벌크업로드 뒤에는 영속성을 날려버려야 한다.
         //혹은 해당 메서드의 @Modifying을 clearAuthmatically = true로 변경한다.
 
@@ -226,6 +225,7 @@ class MemberRepositoryTest {
 
     }
 
+    //@EntityGraph 기능
     @Test
     public void findMemberLazy(){
         //given
@@ -304,4 +304,80 @@ class MemberRepositoryTest {
         List<Member> result = memberRepository.findMemberCustom();
     }
 
+    @Test
+    public void queryByExample() {
+        //given
+
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+
+        Member m1 = new Member("m1", 0, teamA);
+        Member m2 = new Member("m2", 0, teamA);
+        em.persist(m1);
+        em.persist(m2);
+
+        em.flush();
+        em.clear();
+
+        //when
+//        memberRepository.findByUsername("m1");
+        //Probe
+        Member member = new Member("m1");
+        Team team = new Team("teamA");
+        member.setTeam(team);
+
+        ExampleMatcher matcher = ExampleMatcher.matching()
+                .withIgnoreCase("age");
+
+        Example<Member> example = Example.of(member, matcher);
+
+        List<Member> result = memberRepository.findAll(example);
+
+        Assertions.assertThat(result.get(0).getUsername()).isEqualTo("m1");
+
+    }
+
+    @Test
+    public void projections() {
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+
+        Member m1 = new Member("m1", 0, teamA);
+        Member m2 = new Member("m2", 0, teamA);
+        em.persist(m1);
+        em.persist(m2);
+
+        em.flush();
+        em.clear();
+
+        //when
+//        List<NestedClosedProjections> m11 = memberRepository.findProjectionByUsername("m1", NestedClosedProjections.class);
+//        List<NestedClosedProjections> result = m11;
+//        for (NestedClosedProjections nestedClosedProjections : result) {
+//            System.out.println("nestedClosedProjections = " + nestedClosedProjections);
+//        }
+
+    }
+
+    @Test
+    public void nativeQuery(){
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+
+        Member m1 = new Member("m1", 0, teamA);
+        Member m2 = new Member("m2", 0, teamA);
+        em.persist(m1);
+        em.persist(m2);
+
+        em.flush();
+        em.clear();
+
+        //when
+        Page<MemberProjection> result = memberRepository.findByNativeProjection(PageRequest.of(1, 10));
+        List<MemberProjection> content = result.getContent();
+        for (MemberProjection memberProjection : content) {
+            System.out.println("memberProjection = " + memberProjection.getUsername());
+            System.out.println("memberProjection = " + memberProjection.getTeamname());
+        }
+    }
 }
