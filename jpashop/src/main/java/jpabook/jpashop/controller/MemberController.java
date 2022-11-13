@@ -12,7 +12,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
+import java.util.StringJoiner;
 
 @Controller
 @RequiredArgsConstructor
@@ -47,4 +50,5 @@ public class MemberController {
         model.addAttribute("members", memberService.findMembers());
         return "members/memberList";
     }
+
 }

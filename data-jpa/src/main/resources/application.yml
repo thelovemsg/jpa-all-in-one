@@ -5,6 +5,7 @@ spring:
     password:
     driver-class-name: org.h2.Driver
 
+
   jpa:
     hibernate:
       ddl-auto: create
@@ -12,6 +13,7 @@ spring:
       hibernate:
 #          show_sql: true
         format_sql : true
-loggin.level:
+    database: sql-server
+logging.level:
   org.hibernate.SQL: debug
   org.hibernate.type: trace
