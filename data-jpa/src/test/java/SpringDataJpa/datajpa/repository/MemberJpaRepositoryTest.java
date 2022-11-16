@@ -1,6 +1,7 @@
 package SpringDataJpa.datajpa.repository;
 
 import SpringDataJpa.datajpa.entity.Member;
+import SpringDataJpa.datajpa.entity.Team;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,5 +112,7 @@ class MemberJpaRepositoryTest {
         int resultCount = memberJpaRepository.bulkAgePlus(20);
         assertThat(resultCount).isEqualTo(3);
     }
+
+
 
 }
