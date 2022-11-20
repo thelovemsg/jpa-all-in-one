@@ -1,8 +1,8 @@
-package com.example.stock.service;
+package com.example.stock.facade;
 
 import com.example.stock.domain.Stock;
 import com.example.stock.repository.StockRepository;
-import org.aspectj.lang.annotation.Before;
+import com.example.stock.service.PessimisticLockStockService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,13 +14,11 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 @SpringBootTest
-class StockServiceTest {
+class RedissonLockStockFacadeTest {
 
     @Autowired
-    private PessimisticLockStockService stockService;
+    private RedissonLockStockFacade redissonLockStockFacade;
 //    private StockService stockService;
 
 
@@ -40,7 +38,7 @@ class StockServiceTest {
 
     @Test
     public void stock_decrease() {
-        stockService.decrease(1L, 1L);
+        redissonLockStockFacade.decrease(1L, 1L);
 
         //100 - 1 = 99
         Stock stock = stockRepository.findById(1L).orElseThrow();
@@ -55,7 +53,7 @@ class StockServiceTest {
         for(int i=0; i<threadCount; i++){
             executorService.submit(() -> {
                 try {
-                    stockService.decrease(1L, 1L);
+                    redissonLockStockFacade.decrease(1L, 1L);
                 } finally {
                     latch.countDown();
                 }
